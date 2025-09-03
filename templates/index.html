@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Algorithm Generator</title>
+  <title>AI Algorithm Generator with Flowchart</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
   <style>
     body {
       font-family: 'Inter', sans-serif;
@@ -51,20 +52,105 @@
       white-space: pre-wrap;
       line-height: 1.5;
     }
+    .output-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+    .output-section {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 0.75rem;
+      padding: 1rem;
+    }
+    .output-section h3 {
+      margin-top: 0;
+      margin-bottom: 1rem;
+      color: #4299e1;
+      text-align: center;
+    }
+    #flowchart-output {
+      min-height: 300px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .mermaid {
+      background: white;
+      border-radius: 0.5rem;
+      padding: 1rem;
+    }
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      color: #4299e1;
+    }
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(66,153,225,0.3);
+      border-top: 2px solid #4299e1;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    @media (max-width: 768px) {
+      .output-container {
+        grid-template-columns: 1fr;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>AI Algorithm Generator</h1>
-    <textarea id="problemInput" placeholder="Enter your programming problem here..."></textarea>
-    <button id="submitBtn">Generate Algorithm</button>
+    <h1>AI Algorithm Generator with Flowchart</h1>
+    <textarea id="problemInput" placeholder="Enter your programming problem here... (e.g., 'check if a number is odd or even')"></textarea>
+    <button id="submitBtn">Generate Algorithm & Flowchart</button>
+    <div style="margin-top: 1rem; text-align: center;">
+      <label style="color: #4299e1; font-size: 0.9rem;">
+        <input type="checkbox" id="debugMode" style="margin-right: 0.5rem;">
+        Show debug info
+      </label>
+    </div>
     <div id="algorithm-output"></div>
+    <div class="output-container" id="output-container" style="display: none;">
+      <div class="output-section">
+        <h3>Algorithm Steps</h3>
+        <div id="algorithm-text"></div>
+      </div>
+      <div class="output-section">
+        <h3>Visual Flowchart</h3>
+        <div id="flowchart-output"></div>
+      </div>
+    </div>
   </div>
 
   <script>
+    // Initialize Mermaid
+    mermaid.initialize({ 
+      startOnLoad: false,
+      theme: 'default',
+      themeVariables: {
+        primaryColor: '#4299e1',
+        primaryTextColor: '#1a202c',
+        primaryBorderColor: '#2d3748',
+        lineColor: '#4a5568'
+      }
+    });
+
     const problemInput = document.getElementById("problemInput");
     const submitBtn = document.getElementById("submitBtn");
     const algorithmOutput = document.getElementById("algorithm-output");
+    const outputContainer = document.getElementById("output-container");
+    const algorithmText = document.getElementById("algorithm-text");
+    const flowchartOutput = document.getElementById("flowchart-output");
+    const debugMode = document.getElementById("debugMode");
 
     submitBtn.addEventListener("click", async () => {
       const codingQuestion = problemInput.value.trim();
@@ -74,31 +160,115 @@
       }
 
       submitBtn.disabled = true;
-      algorithmOutput.innerHTML = "Generating algorithm...";
+      submitBtn.textContent = "Generating...";
+      algorithmOutput.innerHTML = `
+        <div class="loading">
+          <div class="spinner"></div>
+          <span>Generating algorithm and flowchart...</span>
+        </div>
+      `;
+      outputContainer.style.display = "none";
 
       try {
-        const res = await fetch("/generate-algorithm", {
+        // Step 1: Generate algorithm
+        const algorithmRes = await fetch("/generate-algorithm", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ coding_question: codingQuestion })
         });
 
-        const data = await res.json();
-        if (res.ok) {
-          // Convert numbered markdown to simple paragraphs
-          const lines = data.algorithm.split("\n");
-          algorithmOutput.innerHTML = lines.map(line => line.replace(/^\d+\.\s/, '')).join("\n");
-        } else {
-          algorithmOutput.innerHTML = "Error: " + (data.error || "Failed to generate algorithm.");
+        const algorithmData = await algorithmRes.json();
+        if (!algorithmRes.ok) {
+          throw new Error(algorithmData.error || "Failed to generate algorithm");
+        }
+
+        // Step 2: Generate flowchart
+        algorithmOutput.innerHTML = `
+          <div class="loading">
+            <div class="spinner"></div>
+            <span>Generating flowchart...</span>
+          </div>
+        `;
+
+        const flowchartRes = await fetch("/generate-flowchart", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ algorithm: algorithmData.algorithm })
+        });
+
+        const flowchartData = await flowchartRes.json();
+        if (!flowchartRes.ok) {
+          throw new Error(flowchartData.error || "Failed to generate flowchart");
+        }
+
+        // Display results
+        displayResults(algorithmData.algorithm, flowchartData.flowchart);
+        
+        // Debug info
+        if (debugMode.checked) {
+          console.log("Algorithm:", algorithmData.algorithm);
+          console.log("Flowchart:", flowchartData.flowchart);
         }
 
       } catch (err) {
         console.error(err);
-        algorithmOutput.innerHTML = "Error: Could not connect to server.";
+        algorithmOutput.innerHTML = `<div style="color: #f56565;">Error: ${err.message}</div>`;
       } finally {
         submitBtn.disabled = false;
+        submitBtn.textContent = "Generate Algorithm & Flowchart";
       }
     });
+
+    function displayResults(algorithm, flowchart) {
+      // Hide loading message
+      algorithmOutput.innerHTML = "";
+      
+      // Display algorithm text with better formatting
+      const lines = algorithm.split("\n");
+      const formattedAlgorithm = lines
+        .filter(line => line.trim())
+        .map(line => {
+          // Keep the numbering for better structure
+          if (line.match(/^\d+\./)) {
+            return line;
+          }
+          return line;
+        })
+        .join("\n");
+      
+      algorithmText.innerHTML = `<pre style="white-space: pre-wrap; font-family: 'Inter', sans-serif; line-height: 1.6;">${formattedAlgorithm}</pre>`;
+      
+      // Display flowchart with error handling
+      try {
+        flowchartOutput.innerHTML = `<div class="mermaid">${flowchart}</div>`;
+        
+        // Render the flowchart with error handling
+        mermaid.init(undefined, flowchartOutput.querySelector('.mermaid')).then(() => {
+          console.log("Flowchart rendered successfully");
+        }).catch((error) => {
+          console.error("Mermaid rendering error:", error);
+          flowchartOutput.innerHTML = `
+            <div style="color: #f56565; text-align: center; padding: 2rem;">
+              <h4>Flowchart Rendering Error</h4>
+              <p>Could not render the flowchart. Here's the raw Mermaid code:</p>
+              <pre style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 0.5rem; margin-top: 1rem; text-align: left; overflow-x: auto;">${flowchart}</pre>
+            </div>
+          `;
+        });
+      } catch (error) {
+        console.error("Flowchart display error:", error);
+        flowchartOutput.innerHTML = `
+          <div style="color: #f56565; text-align: center; padding: 2rem;">
+            <h4>Flowchart Error</h4>
+            <p>Error displaying flowchart: ${error.message}</p>
+            <pre style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 0.5rem; margin-top: 1rem; text-align: left; overflow-x: auto;">${flowchart}</pre>
+          </div>
+        `;
+      }
+      
+      // Show the output container
+      outputContainer.style.display = "grid";
+    }
   </script>
 </body>
 </html>
