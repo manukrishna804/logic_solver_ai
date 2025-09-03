@@ -3,250 +3,102 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Flowchart Generator - Glassy</title>
+  <title>AI Algorithm Generator</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
-    :root {
-      --bg-gradient: linear-gradient(135deg, #1a202c, #2d3748);
-      --glass-bg: rgba(255, 255, 255, 0.08);
-      --glass-border: rgba(255, 255, 255, 0.2);
-      --text-color: #f1f5f9;
-      --button-bg: rgba(66, 153, 225, 0.7);
-      --button-hover-bg: rgba(49, 130, 206, 0.85);
-      --accent-color: #63b3ed;
-      --error-bg: rgba(220, 38, 38, 0.8);
-      --error-text: #ffffff;
-    }
-
     body {
       font-family: 'Inter', sans-serif;
-      background: var(--bg-gradient);
-      color: var(--text-color);
-      padding: 1.5rem;
+      background: linear-gradient(135deg, #1a202c, #2d3748);
+      color: #f1f5f9;
       display: flex;
       justify-content: center;
       align-items: flex-start;
       min-height: 100vh;
-      box-sizing: border-box;
-    }
-
-    .container {
-      max-width: 900px;
-      width: 100%;
       padding: 2rem;
-      background: var(--glass-bg);
+      box-sizing: border-box;
+    }
+    .container {
+      max-width: 800px;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.08);
       border-radius: 1rem;
-      border: 1px solid var(--glass-border);
+      border: 1px solid rgba(255,255,255,0.2);
       backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-      margin-top: 2.5rem;
+      padding: 2rem;
       box-sizing: border-box;
     }
-
-    .container h1 {
-      font-size: 2.25rem;
-      font-weight: 700;
-      text-align: center;
-      margin-bottom: 1.5rem;
+    h1 { text-align: center; margin-bottom: 1rem; }
+    textarea {
+      width: 100%; height: 120px; padding: 1rem;
+      border-radius: 0.75rem; border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.05); color: #f1f5f9; resize: none;
+      font-size: 1rem;
+      box-sizing: border-box;
     }
-
-    .container p {
-      text-align: center;
-      color: #cbd5e0;
-      margin-bottom: 2rem;
-      max-width: 40rem;
-      margin-left: auto;
-      margin-right: auto;
+    button {
+      width: 100%; margin-top: 1rem; padding: 0.75rem; border: none;
+      border-radius: 0.75rem; background: rgba(66,153,225,0.7);
+      color: white; font-weight: 600; cursor: pointer;
+      transition: background 0.3s ease;
     }
-
-    .input-group {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-
-    #problemInput {
-      width: 100%;
-      height: 10rem;
+    button:hover { background: rgba(49,130,206,0.85); }
+    #algorithm-output {
+      margin-top: 1.5rem;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 0.75rem;
       padding: 1rem;
-      border-radius: 0.75rem;
-      border: 1px solid var(--glass-border);
-      background: rgba(255, 255, 255, 0.05);
-      color: var(--text-color);
-      resize: none;
-      font-size: 1rem;
-      box-sizing: border-box;
-      backdrop-filter: blur(6px);
-    }
-
-    #problemInput:focus {
-      outline: none;
-      border-color: var(--accent-color);
-      box-shadow: 0 0 0 3px rgba(99, 179, 237, 0.5);
-    }
-
-    #submitBtn {
-      width: 100%;
-      padding: 0.75rem;
-      border-radius: 0.75rem;
-      font-weight: 600;
-      color: white;
-      background: var(--button-bg);
-      border: none;
-      cursor: pointer;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-      transition: background 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease;
-      font-size: 1rem;
-    }
-
-    #submitBtn:hover {
-      background: var(--button-hover-bg);
-      transform: translateY(-2px);
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.35);
-    }
-
-    #loading {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      margin-top: 2rem;
-    }
-
-    .spinner {
-      border: 4px solid rgba(255, 255, 255, 0.15);
-      border-top: 4px solid var(--button-bg);
-      border-radius: 50%;
-      width: 32px;
-      height: 32px;
-      animation: spin 1s linear infinite;
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    #flowchart-section {
-      display: none;
-      margin-top: 2.5rem;
-    }
-
-    #flowchart-section h2 {
-      font-size: 1.5rem;
-      font-weight: 600;
-      margin-bottom: 1rem;
-      text-align: center;
-    }
-
-    .flowchart-container {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid var(--glass-border);
-      border-radius: 0.75rem;
-      padding: 1.5rem;
-      overflow-x: auto;
-      backdrop-filter: blur(8px);
-    }
-
-    #flowchart-diagram svg {
-      background: transparent;
-      border-radius: 0.5rem;
-      min-width: 100%;
-      height: auto;
-    }
-
-    #sources {
-      margin-top: 1rem;
-      font-size: 0.875rem;
-      color: #a0aec0;
-      text-align: center;
-    }
-
-    #sources a {
-      color: var(--accent-color);
-      text-decoration: none;
-    }
-
-    #sources a:hover {
-      text-decoration: underline;
-    }
-
-    .custom-alert {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: var(--error-bg);
-      padding: 1.5rem;
-      border-radius: 0.75rem;
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.25);
-      color: var(--error-text);
-      text-align: center;
-      z-index: 50;
-      max-width: 90%;
-      backdrop-filter: blur(10px);
-    }
-
-    .custom-alert p.title {
-      font-weight: 700;
-    }
-
-    .custom-alert p.message {
-      margin-top: 0.5rem;
-      font-size: 0.875rem;
-    }
-
-    .custom-alert button {
-      margin-top: 1rem;
-      padding: 0.5rem 1rem;
-      background-color: #991b1b;
-      border-radius: 0.5rem;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-      .container { padding: 1.5rem; }
-      .container h1 { font-size: 1.75rem; }
-      #problemInput { height: 8rem; }
-    }
-
-    @media (max-width: 480px) {
-      body { padding: 1rem; }
-      .container { padding: 1rem; margin-top: 1rem; }
-      .container h1 { font-size: 1.5rem; }
-      #problemInput { height: 7rem; font-size: 0.9rem; }
-      #submitBtn { font-size: 0.9rem; padding: 0.6rem; }
+      font-family: monospace;
+      white-space: pre-wrap;
+      line-height: 1.5;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>AI Flowchart Generator</h1>
-    <p>Enter a programming problem statement below and I will generate a visual flowchart of the solution algorithm.</p>
-
-    <div class="input-group">
-      <textarea id="problemInput"
-        placeholder="Enter your programming problem here... (e.g., Check if a number is prime)"></textarea>
-      <button id="submitBtn">Generate Flowchart</button>
-    </div>
-
-    <div id="loading">
-      <div class="spinner"></div>
-      <p>Thinking...</p>
-    </div>
-
-    <div id="flowchart-section">
-      <h2>Generated Flowchart</h2>
-      <div id="flowchart-container" class="flowchart-container">
-        <div id="flowchart-diagram"></div>
-      </div>
-      <div id="sources"></div>
-    </div>
+    <h1>AI Algorithm Generator</h1>
+    <textarea id="problemInput" placeholder="Enter your programming problem here..."></textarea>
+    <button id="submitBtn">Generate Algorithm</button>
+    <div id="algorithm-output"></div>
   </div>
+
+  <script>
+    const problemInput = document.getElementById("problemInput");
+    const submitBtn = document.getElementById("submitBtn");
+    const algorithmOutput = document.getElementById("algorithm-output");
+
+    submitBtn.addEventListener("click", async () => {
+      const codingQuestion = problemInput.value.trim();
+      if (!codingQuestion) {
+        alert("Please enter a programming problem.");
+        return;
+      }
+
+      submitBtn.disabled = true;
+      algorithmOutput.innerHTML = "Generating algorithm...";
+
+      try {
+        const res = await fetch("/generate-algorithm", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ coding_question: codingQuestion })
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+          // Convert numbered markdown to simple paragraphs
+          const lines = data.algorithm.split("\n");
+          algorithmOutput.innerHTML = lines.map(line => line.replace(/^\d+\.\s/, '')).join("\n");
+        } else {
+          algorithmOutput.innerHTML = "Error: " + (data.error || "Failed to generate algorithm.");
+        }
+
+      } catch (err) {
+        console.error(err);
+        algorithmOutput.innerHTML = "Error: Could not connect to server.";
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+  </script>
 </body>
 </html>
