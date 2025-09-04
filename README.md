@@ -39,8 +39,7 @@ Requirements
 Install
 -------
 1) Clone the repo
-   - GitHub (HTTPS):
-     https://github.com/manukrishna804/webscrap.git
+   - GitHub (HTTPS):https://github.com/manukrishna804/logic_solver_ai.git
 
 2) Create and activate a virtual environment
    - Windows PowerShell:
@@ -113,5 +112,6 @@ Troubleshooting
   - The UI shows raw Mermaid code if rendering fails. Verify it starts with `flowchart TD`.
 - Python indentation looks wrong in output:
   - The app runs a post-processor to fix indentation. If you still see issues, paste into a Python formatter (e.g., `black`) after copying.
+
 
 
