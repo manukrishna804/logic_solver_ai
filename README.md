@@ -100,11 +100,9 @@ API Endpoints
 
 Screenshots
 -----------
-```
-![input](docs/input.png)
-![Algorithm + Flowchart](docs/algorithm&flowchart.png)
+![Input](docs/input.png)
+![Algorithm and Flowchart](docs/algorithm%26flowchart.png)
 ![Code](docs/code.png)
-```
 
 
 Troubleshooting
