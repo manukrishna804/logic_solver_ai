@@ -3,8 +3,6 @@ AI Algorithm + Flowchart + Code Generator
 
 Generate clear step-by-step algorithms, Mermaid flowcharts, and minimal working code for multiple languages (Python, Java, JavaScript, C++, C#) from a natural language problem statement.
 
-
-
 Overview
 --------
 This app lets you type a problem like “Implement Binary Search” and produces:
@@ -115,4 +113,5 @@ Troubleshooting
   - The UI shows raw Mermaid code if rendering fails. Verify it starts with `flowchart TD`.
 - Python indentation looks wrong in output:
   - The app runs a post-processor to fix indentation. If you still see issues, paste into a Python formatter (e.g., `black`) after copying.
+
 
