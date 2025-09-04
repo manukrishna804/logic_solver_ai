@@ -51,6 +51,8 @@ Requirements:
 4. Include input/output steps
 5. Make it easy to follow the logic flow
 6. Use proper programming terminology
+7. For complex algorithms like binary search, include detailed steps with proper variable tracking
+8. Ensure each step is atomic and well-defined
 
 Format example:
 1. Start
@@ -60,6 +62,21 @@ Format example:
 5. Else
 6. Output: "Number is odd"
 7. End
+
+For binary search example:
+1. Start
+2. Input: Get sorted array and target value
+3. Initialize left = 0, right = array.length - 1
+4. While left <= right
+5. Calculate mid = (left + right) / 2
+6. If array[mid] == target
+7. Return mid (found)
+8. Else if array[mid] < target
+9. Set left = mid + 1
+10. Else
+11. Set right = mid - 1
+12. Return -1 (not found)
+13. End
 
 Generate the algorithm:"""
 
@@ -92,16 +109,18 @@ def generate_flowchart():
 
 Create a flowchart with these rules:
 1. Start with: flowchart TD
-2. Use simple node IDs: A, B, C, D, E, F, G, H, I, J
+2. Use simple node IDs: A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T
 3. For decisions use: A{{"condition"}}
 4. For processes use: A["action"]
 5. For start/end use: A(["Start"]) or A(["End"])
 6. Use arrows: A --> B
 7. For yes/no branches: A -->|Yes| B and A -->|No| C
-8. Keep labels short and clear
+8. Keep labels short and clear (max 20 characters per node)
 9. Follow the exact sequence of the algorithm
+10. For loops, ensure proper flow back to the loop condition
+11. For complex algorithms like binary search, include all decision points and variable updates
 
-Example format:
+Example format for simple algorithm:
 flowchart TD
     A(["Start"])
     B["Input: Get number"]
@@ -115,6 +134,35 @@ flowchart TD
     C -->|No| E
     D --> F
     E --> F
+
+Example format for binary search:
+flowchart TD
+    A(["Start"])
+    B["Input: array, target"]
+    C["left=0, right=length-1"]
+    D{{"left <= right?"}}
+    E["mid = (left+right)/2"]
+    F{{"array[mid] == target?"}}
+    G["Return mid"]
+    H{{"array[mid] < target?"}}
+    I["left = mid + 1"]
+    J["right = mid - 1"]
+    K["Return -1"]
+    L(["End"])
+    A --> B
+    B --> C
+    C --> D
+    D -->|Yes| E
+    D -->|No| K
+    E --> F
+    F -->|Yes| G
+    F -->|No| H
+    H -->|Yes| I
+    H -->|No| J
+    I --> D
+    J --> D
+    G --> L
+    K --> L
 
 Generate the flowchart:"""
 
@@ -224,6 +272,184 @@ def generate_fallback_flowchart(algorithm_text):
     D --> F
     E --> F"""
         return jsonify({"flowchart": simple_flowchart})
+
+@app.route("/generate-code", methods=["POST"])
+def generate_code():
+    data = request.json
+    algorithm_text = data.get("algorithm")
+    programming_language = data.get("programming_language", "python")
+    
+    if not algorithm_text:
+        return jsonify({"error": "No algorithm provided"}), 400
+
+    if gemini_model is None:
+        return jsonify({"error": "GOOGLE_API_KEY not set or model not initialized"}), 500
+
+    prompt = f"""Convert this algorithm into clean, simple {programming_language} code:
+
+{algorithm_text}
+
+Requirements:
+1. Write ONLY the essential solution code
+2. Keep it simple and concise
+3. Include minimal necessary comments
+4. NO verbose explanations or documentation
+5. NO example usage or test cases
+6. NO extensive error handling
+7. Focus on the core algorithm implementation
+8. Use clear variable names
+
+For Python:
+- Simple function with clear logic
+- Basic comments only
+- Use 4 spaces for indentation (no tabs)
+- Follow PEP 8 style guidelines
+- Ensure proper indentation for if/else, loops, and function blocks
+
+For Java:
+- Simple class with main method
+- Essential code only
+
+For JavaScript:
+- Simple function
+- Clean ES6+ syntax
+
+Generate ONLY the essential {programming_language} code:"""
+
+    try:
+        response = gemini_model.generate_content(prompt)
+        code_text = getattr(response, "text", None) or getattr(response, "output_text", None)
+        if not code_text:
+            return jsonify({"error": "Failed to generate code"}), 500
+        
+        # Clean up the code to remove verbose content
+        cleaned_code = clean_generated_code(code_text, programming_language)
+        return jsonify({"code": cleaned_code})
+    except Exception as e:
+        print("Error generating code:", e)
+        return jsonify({"error": "Internal server error"}), 500
+
+def clean_generated_code(code_text, language):
+    """Clean up generated code to remove verbose content and keep only essential solution"""
+    lines = code_text.split('\n')
+    cleaned_lines = []
+    
+    # Remove common verbose patterns
+    skip_patterns = [
+        "Here's the",
+        "Here is the",
+        "The following",
+        "This code",
+        "Example usage:",
+        "Test case:",
+        "Sample input:",
+        "Output:",
+        "Explanation:",
+        "Note:",
+        "Remember:",
+        "Make sure",
+        "Don't forget",
+        "You can",
+        "This will",
+        "The function",
+        "This implementation",
+        "```",
+        "---",
+        "===",
+        "***"
+    ]
+    
+    in_code_block = False
+    for line in lines:
+        original_line = line
+        line = line.strip()
+        
+        # Skip empty lines at the beginning
+        if not line and not cleaned_lines:
+            continue
+            
+        # Check if we're entering a code block
+        if line.startswith("```"):
+            in_code_block = not in_code_block
+            continue
+            
+        # If we're in a code block, add the line
+        if in_code_block:
+            cleaned_lines.append(original_line)  # Keep original indentation
+            continue
+            
+        # Skip verbose explanation lines
+        if any(pattern.lower() in line.lower() for pattern in skip_patterns):
+            continue
+            
+        # Skip lines that are clearly explanations (not code)
+        if (line and 
+            not line.startswith(('#', '//', '/*', '*', '//', '--')) and
+            not any(char in line for char in ['{', '}', '(', ')', '=', ';', ':', '->', 'def ', 'function ', 'class ', 'public ', 'private ', 'import ', 'from ', 'const ', 'let ', 'var ']) and
+            not line.startswith(('if ', 'for ', 'while ', 'return ', 'print', 'console', 'System.out'))):
+            continue
+            
+        # Add the line if it looks like code
+        if line:
+            cleaned_lines.append(original_line)  # Keep original indentation
+    
+    # Join lines and clean up
+    result = '\n'.join(cleaned_lines)
+    
+    # Fix Python indentation if it's Python code
+    if language.lower() == 'python':
+        result = fix_python_indentation(result)
+    
+    # Remove multiple consecutive empty lines
+    import re
+    result = re.sub(r'\n\s*\n\s*\n', '\n\n', result)
+    
+    # Remove leading/trailing whitespace
+    result = result.strip()
+    
+    return result
+
+def fix_python_indentation(code):
+    """Fix Python indentation to ensure proper syntax"""
+    lines = code.split('\n')
+    fixed_lines = []
+    indent_level = 0
+    indent_size = 4  # Standard Python indentation
+    
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+        stripped = line.strip()
+        
+        # Skip empty lines
+        if not stripped:
+            fixed_lines.append('')
+            i += 1
+            continue
+        
+        # Handle dedentation keywords (reduce indent level)
+        if stripped.startswith(('else:', 'elif ', 'except:', 'finally:', 'except ')):
+            indent_level = max(0, indent_level - 1)
+        elif stripped.startswith(('except ', 'except:')):
+            indent_level = max(0, indent_level - 1)
+        
+        # Add the line with proper indentation
+        indent = ' ' * (indent_level * indent_size)
+        fixed_lines.append(indent + stripped)
+        
+        # Handle indentation for next line
+        if stripped.endswith(':'):
+            indent_level += 1
+        elif stripped.startswith(('return ', 'break', 'continue', 'pass')):
+            # These usually end a block, next line should be dedented
+            pass
+        elif stripped.startswith(('if ', 'for ', 'while ', 'def ', 'class ', 'try:', 'with ')):
+            # These start a new block
+            pass
+        
+        i += 1
+    
+    return '\n'.join(fixed_lines)
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000)

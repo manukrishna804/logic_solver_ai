@@ -3,123 +3,368 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Algorithm Generator with Flowchart</title>
+  <title>AI Algorithm Generator with Flowchart & Code</title>
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10.6.1/dist/mermaid.min.js"></script>
   <style>
-    body {
-      font-family: 'Inter', sans-serif;
-      background: linear-gradient(135deg, #1a202c, #2d3748);
-      color: #f1f5f9;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      min-height: 100vh;
-      padding: 2rem;
+    * {
+      margin: 0;
+      padding: 0;
       box-sizing: border-box;
     }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #1a202c, #2d3748);
+      color: #f1f5f9;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
     .container {
-      max-width: 800px;
-      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
       background: rgba(255, 255, 255, 0.08);
       border-radius: 1rem;
       border: 1px solid rgba(255,255,255,0.2);
       backdrop-filter: blur(12px);
       padding: 2rem;
-      box-sizing: border-box;
     }
-    h1 { text-align: center; margin-bottom: 1rem; }
-    textarea {
-      width: 100%; height: 120px; padding: 1rem;
-      border-radius: 0.75rem; border: 1px solid rgba(255,255,255,0.2);
-      background: rgba(255,255,255,0.05); color: #f1f5f9; resize: none;
-      font-size: 1rem;
-      box-sizing: border-box;
+
+    h1 {
+      text-align: center;
+      margin-bottom: 2rem;
+      background: linear-gradient(135deg, #4299e1, #63b3ed);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-size: 2.5rem;
+      font-weight: 700;
     }
-    button {
-      width: 100%; margin-top: 1rem; padding: 0.75rem; border: none;
-      border-radius: 0.75rem; background: rgba(66,153,225,0.7);
-      color: white; font-weight: 600; cursor: pointer;
-      transition: background 0.3s ease;
-    }
-    button:hover { background: rgba(49,130,206,0.85); }
-    #algorithm-output {
-      margin-top: 1.5rem;
+
+    .input-section {
       background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.2);
       border-radius: 0.75rem;
-      padding: 1rem;
-      font-family: monospace;
-      white-space: pre-wrap;
-      line-height: 1.5;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      border: 1px solid rgba(255,255,255,0.1);
     }
+
+    .input-group {
+      margin-bottom: 1rem;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: #a0aec0;
+      font-weight: 500;
+    }
+
+    textarea {
+      width: 100%;
+      height: 120px;
+      padding: 1rem;
+      border-radius: 0.75rem;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.05);
+      color: #f1f5f9;
+      resize: vertical;
+      font-size: 1rem;
+      font-family: inherit;
+      transition: border-color 0.3s ease;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: #4299e1;
+      box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+    }
+
+    .controls-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    select {
+      width: 100%;
+      padding: 0.75rem;
+      border-radius: 0.75rem;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(0,0,0,0.3);
+      color: #f1f5f9;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    select:focus {
+      outline: none;
+      border-color: #4299e1;
+      box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+      background: rgba(0,0,0,0.4);
+    }
+
+    select:hover {
+      background: rgba(0,0,0,0.4);
+      border-color: #4299e1;
+    }
+
+    select option {
+      background: #1a202c;
+      color: #f1f5f9;
+      padding: 0.5rem;
+    }
+
+    .button-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    button {
+      padding: 0.875rem 1.5rem;
+      border: none;
+      border-radius: 0.75rem;
+      background: linear-gradient(135deg, #4299e1, #3182ce);
+      color: white;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    button:hover:not(:disabled) {
+      background: linear-gradient(135deg, #3182ce, #2c5282);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(66, 153, 225, 0.3);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .secondary-btn {
+      background: linear-gradient(135deg, #48bb78, #38a169);
+    }
+
+    .secondary-btn:hover:not(:disabled) {
+      background: linear-gradient(135deg, #38a169, #2f855a);
+      box-shadow: 0 10px 25px rgba(72, 187, 120, 0.3);
+    }
+
     .output-container {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 1.5rem;
-      margin-top: 1.5rem;
+      gap: 2rem;
+      margin-top: 2rem;
     }
+
     .output-section {
       background: rgba(255,255,255,0.05);
       border: 1px solid rgba(255,255,255,0.2);
       border-radius: 0.75rem;
-      padding: 1rem;
+      padding: 1.5rem;
+      min-height: 400px;
     }
+
     .output-section h3 {
       margin-top: 0;
       margin-bottom: 1rem;
       color: #4299e1;
       text-align: center;
+      font-size: 1.25rem;
+      font-weight: 600;
     }
+
+    .code-section {
+      grid-column: 1 / -1;
+      margin-top: 2rem;
+    }
+
+    .code-section h3 {
+      color: #48bb78;
+    }
+
+    #algorithm-text {
+      font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+      white-space: pre-wrap;
+      line-height: 1.6;
+      background: rgba(0,0,0,0.3);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      border: 1px solid rgba(255,255,255,0.1);
+      overflow-x: auto;
+    }
+
     #flowchart-output {
       min-height: 300px;
       display: flex;
       align-items: center;
       justify-content: center;
     }
+
     .mermaid {
       background: white;
       border-radius: 0.5rem;
       padding: 1rem;
+      max-width: 100%;
+      overflow-x: auto;
     }
+
+    #code-output {
+      font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+      white-space: pre-wrap;
+      line-height: 1.6;
+      background: rgba(0,0,0,0.3);
+      padding: 1.5rem;
+      border-radius: 0.5rem;
+      border: 1px solid rgba(255,255,255,0.1);
+      overflow-x: auto;
+      max-height: 300px;
+      overflow-y: auto;
+      font-size: 0.9rem;
+    }
+
     .loading {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 0.5rem;
+      gap: 0.75rem;
       color: #4299e1;
+      font-size: 1.1rem;
     }
+
     .spinner {
-      width: 20px;
-      height: 20px;
-      border: 2px solid rgba(66,153,225,0.3);
-      border-top: 2px solid #4299e1;
+      width: 24px;
+      height: 24px;
+      border: 3px solid rgba(66,153,225,0.3);
+      border-top: 3px solid #4299e1;
       border-radius: 50%;
       animation: spin 1s linear infinite;
     }
+
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+
+    .error {
+      color: #f56565;
+      background: rgba(245, 101, 101, 0.1);
+      border: 1px solid rgba(245, 101, 101, 0.3);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      text-align: center;
+    }
+
+    .success {
+      color: #48bb78;
+      background: rgba(72, 187, 120, 0.1);
+      border: 1px solid rgba(72, 187, 120, 0.3);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      text-align: center;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      padding: 0.5rem;
+      font-size: 0.875rem;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #a0aec0;
+      border-radius: 0.375rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .copy-btn:hover {
+      background: rgba(255,255,255,0.2);
+      color: #f1f5f9;
+    }
+
+    .code-container {
+      position: relative;
+    }
+
     @media (max-width: 768px) {
+      .container {
+        padding: 1rem;
+      }
+
       .output-container {
         grid-template-columns: 1fr;
       }
+
+      .controls-row,
+      .button-group {
+        grid-template-columns: 1fr;
+      }
+
+      h1 {
+        font-size: 2rem;
+      }
     }
+
+    /* Syntax highlighting for code */
+    .code-keyword { color: #c678dd; }
+    .code-string { color: #98c379; }
+    .code-comment { color: #5c6370; font-style: italic; }
+    .code-function { color: #61dafb; }
+    .code-number { color: #d19a66; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>AI Algorithm Generator with Flowchart</h1>
-    <textarea id="problemInput" placeholder="Enter your programming problem here... (e.g., 'check if a number is odd or even')"></textarea>
-    <button id="submitBtn">Generate Algorithm & Flowchart</button>
-    <div style="margin-top: 1rem; text-align: center;">
-      <label style="color: #4299e1; font-size: 0.9rem;">
-        <input type="checkbox" id="debugMode" style="margin-right: 0.5rem;">
-        Show debug info
-      </label>
+    <h1>AI Algorithm Generator with Flowchart & Code</h1>
+    
+    <div class="input-section">
+      <div class="input-group">
+        <label for="problemInput">Enter your programming problem:</label>
+        <textarea id="problemInput" placeholder="e.g., 'Implement binary search algorithm', 'Check if a number is prime', 'Sort an array using bubble sort'"></textarea>
+      </div>
+      
+      <div class="controls-row">
+        <div class="input-group">
+          <label for="languageSelect">Programming Language:</label>
+          <select id="languageSelect">
+            <option value="python">Python</option>
+            <option value="java">Java</option>
+            <option value="javascript">JavaScript</option>
+            <option value="cpp">C++</option>
+            <option value="csharp">C#</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label>&nbsp;</label>
+          <div class="button-group">
+            <button id="generateBtn">Generate Algorithm & Flowchart</button>
+            <button id="generateCodeBtn" class="secondary-btn" disabled>Generate Code</button>
+          </div>
+        </div>
+      </div>
     </div>
-    <div id="algorithm-output"></div>
-    <div class="output-container" id="output-container" style="display: none;">
+
+    <div id="loading-section" class="hidden">
+      <div class="loading">
+        <div class="spinner"></div>
+        <span id="loading-text">Generating algorithm and flowchart...</span>
+      </div>
+    </div>
+
+    <div id="output-container" class="hidden">
       <div class="output-section">
         <h3>Algorithm Steps</h3>
         <div id="algorithm-text"></div>
@@ -127,6 +372,14 @@
       <div class="output-section">
         <h3>Visual Flowchart</h3>
         <div id="flowchart-output"></div>
+      </div>
+    </div>
+
+    <div id="code-section" class="code-section hidden">
+      <h3>Generated Code</h3>
+      <div class="code-container">
+        <button class="copy-btn" id="copyCodeBtn" title="Copy code">📋</button>
+        <div id="code-output"></div>
       </div>
     </div>
   </div>
@@ -144,30 +397,37 @@
       }
     });
 
+    // DOM elements
     const problemInput = document.getElementById("problemInput");
-    const submitBtn = document.getElementById("submitBtn");
-    const algorithmOutput = document.getElementById("algorithm-output");
+    const languageSelect = document.getElementById("languageSelect");
+    const generateBtn = document.getElementById("generateBtn");
+    const generateCodeBtn = document.getElementById("generateCodeBtn");
+    const loadingSection = document.getElementById("loading-section");
+    const loadingText = document.getElementById("loading-text");
     const outputContainer = document.getElementById("output-container");
+    const codeSection = document.getElementById("code-section");
     const algorithmText = document.getElementById("algorithm-text");
     const flowchartOutput = document.getElementById("flowchart-output");
-    const debugMode = document.getElementById("debugMode");
+    const codeOutput = document.getElementById("code-output");
+    const copyCodeBtn = document.getElementById("copyCodeBtn");
 
-    submitBtn.addEventListener("click", async () => {
+    let currentAlgorithm = "";
+
+    // Generate algorithm and flowchart
+    generateBtn.addEventListener("click", async () => {
       const codingQuestion = problemInput.value.trim();
       if (!codingQuestion) {
         alert("Please enter a programming problem.");
         return;
       }
 
-      submitBtn.disabled = true;
-      submitBtn.textContent = "Generating...";
-      algorithmOutput.innerHTML = `
-        <div class="loading">
-          <div class="spinner"></div>
-          <span>Generating algorithm and flowchart...</span>
-        </div>
-      `;
-      outputContainer.style.display = "none";
+      generateBtn.disabled = true;
+      generateBtn.textContent = "Generating...";
+      loadingSection.classList.remove("hidden");
+      loadingText.textContent = "Generating algorithm and flowchart...";
+      outputContainer.classList.add("hidden");
+      codeSection.classList.add("hidden");
+      generateCodeBtn.disabled = true;
 
       try {
         // Step 1: Generate algorithm
@@ -182,18 +442,15 @@
           throw new Error(algorithmData.error || "Failed to generate algorithm");
         }
 
+        currentAlgorithm = algorithmData.algorithm;
+
         // Step 2: Generate flowchart
-        algorithmOutput.innerHTML = `
-          <div class="loading">
-            <div class="spinner"></div>
-            <span>Generating flowchart...</span>
-          </div>
-        `;
+        loadingText.textContent = "Generating flowchart...";
 
         const flowchartRes = await fetch("/generate-flowchart", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ algorithm: algorithmData.algorithm })
+          body: JSON.stringify({ algorithm: currentAlgorithm })
         });
 
         const flowchartData = await flowchartRes.json();
@@ -202,33 +459,80 @@
         }
 
         // Display results
-        displayResults(algorithmData.algorithm, flowchartData.flowchart);
-        
-        // Debug info
-        if (debugMode.checked) {
-          console.log("Algorithm:", algorithmData.algorithm);
-          console.log("Flowchart:", flowchartData.flowchart);
-        }
+        displayResults(currentAlgorithm, flowchartData.flowchart);
 
       } catch (err) {
         console.error(err);
-        algorithmOutput.innerHTML = `<div style="color: #f56565;">Error: ${err.message}</div>`;
+        loadingSection.classList.add("hidden");
+        outputContainer.innerHTML = `<div class="error">Error: ${err.message}</div>`;
+        outputContainer.classList.remove("hidden");
       } finally {
-        submitBtn.disabled = false;
-        submitBtn.textContent = "Generate Algorithm & Flowchart";
+        generateBtn.disabled = false;
+        generateBtn.textContent = "Generate Algorithm & Flowchart";
+        loadingSection.classList.add("hidden");
+      }
+    });
+
+    // Generate code
+    generateCodeBtn.addEventListener("click", async () => {
+      if (!currentAlgorithm) {
+        alert("Please generate an algorithm first.");
+        return;
+      }
+
+      generateCodeBtn.disabled = true;
+      generateCodeBtn.textContent = "Generating...";
+      loadingSection.classList.remove("hidden");
+      loadingText.textContent = `Generating ${languageSelect.value} code...`;
+
+      try {
+        const codeRes = await fetch("/generate-code", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ 
+            algorithm: currentAlgorithm,
+            programming_language: languageSelect.value
+          })
+        });
+
+        const codeData = await codeRes.json();
+        if (!codeRes.ok) {
+          throw new Error(codeData.error || "Failed to generate code");
+        }
+
+        displayCode(codeData.code);
+
+      } catch (err) {
+        console.error(err);
+        codeOutput.innerHTML = `<div class="error">Error: ${err.message}</div>`;
+        codeSection.classList.remove("hidden");
+      } finally {
+        generateCodeBtn.disabled = false;
+        generateCodeBtn.textContent = "Generate Code";
+        loadingSection.classList.add("hidden");
+      }
+    });
+
+    // Copy code functionality
+    copyCodeBtn.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(codeOutput.textContent);
+        copyCodeBtn.textContent = "✓";
+        setTimeout(() => {
+          copyCodeBtn.textContent = "📋";
+        }, 2000);
+      } catch (err) {
+        console.error("Failed to copy code:", err);
+        alert("Failed to copy code to clipboard");
       }
     });
 
     function displayResults(algorithm, flowchart) {
-      // Hide loading message
-      algorithmOutput.innerHTML = "";
-      
       // Display algorithm text with better formatting
       const lines = algorithm.split("\n");
       const formattedAlgorithm = lines
         .filter(line => line.trim())
         .map(line => {
-          // Keep the numbering for better structure
           if (line.match(/^\d+\./)) {
             return line;
           }
@@ -236,19 +540,18 @@
         })
         .join("\n");
       
-      algorithmText.innerHTML = `<pre style="white-space: pre-wrap; font-family: 'Inter', sans-serif; line-height: 1.6;">${formattedAlgorithm}</pre>`;
+      algorithmText.innerHTML = `<pre>${formattedAlgorithm}</pre>`;
       
       // Display flowchart with error handling
       try {
         flowchartOutput.innerHTML = `<div class="mermaid">${flowchart}</div>`;
         
-        // Render the flowchart with error handling
         mermaid.init(undefined, flowchartOutput.querySelector('.mermaid')).then(() => {
           console.log("Flowchart rendered successfully");
         }).catch((error) => {
           console.error("Mermaid rendering error:", error);
           flowchartOutput.innerHTML = `
-            <div style="color: #f56565; text-align: center; padding: 2rem;">
+            <div class="error">
               <h4>Flowchart Rendering Error</h4>
               <p>Could not render the flowchart. Here's the raw Mermaid code:</p>
               <pre style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 0.5rem; margin-top: 1rem; text-align: left; overflow-x: auto;">${flowchart}</pre>
@@ -258,7 +561,7 @@
       } catch (error) {
         console.error("Flowchart display error:", error);
         flowchartOutput.innerHTML = `
-          <div style="color: #f56565; text-align: center; padding: 2rem;">
+          <div class="error">
             <h4>Flowchart Error</h4>
             <p>Error displaying flowchart: ${error.message}</p>
             <pre style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 0.5rem; margin-top: 1rem; text-align: left; overflow-x: auto;">${flowchart}</pre>
@@ -266,9 +569,24 @@
         `;
       }
       
-      // Show the output container
-      outputContainer.style.display = "grid";
+      // Show the output container and enable code generation
+      outputContainer.classList.remove("hidden");
+      generateCodeBtn.disabled = false;
     }
+
+    function displayCode(code) {
+      codeOutput.innerHTML = `<pre>${code}</pre>`;
+      codeSection.classList.remove("hidden");
+      
+      // Scroll to code section
+      codeSection.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Auto-resize textarea
+    problemInput.addEventListener('input', function() {
+      this.style.height = 'auto';
+      this.style.height = this.scrollHeight + 'px';
+    });
   </script>
 </body>
 </html>
